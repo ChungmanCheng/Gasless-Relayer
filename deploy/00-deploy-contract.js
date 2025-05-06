@@ -17,7 +17,7 @@ module.exports = async function({ getNamedAccounts, deployments }){
 
     contract = await deploy("GaslessRelayer", {
         from: deployer,
-        args: [],
+        args: ["0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", "100000"],
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     });
@@ -28,7 +28,7 @@ module.exports = async function({ getNamedAccounts, deployments }){
 
     console.log("----------------------------------------------------");
 
-    await verify( contract.address, [] );
+    await verify( contract.address, ["0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", "100000"] );
 
 }
 
