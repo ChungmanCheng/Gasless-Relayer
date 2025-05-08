@@ -95,7 +95,7 @@ export default function Home() {
         from: address,
         to: USDC_ADDRESS,
         value: 0,
-        gas: 100000,
+        gas: 1000000,
         nonce,
         data
       };

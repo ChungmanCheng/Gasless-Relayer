@@ -12,7 +12,17 @@ const relayerAbi = [
 ];
 
 const permitAbi = [
-  "function permit(address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)"
+  "function permit(address owner,address spender,uint256 value,uint256 deadline,uint8 v,bytes32 r,bytes32 s)",
+
+  // Standard ERC20
+  "function balanceOf(address owner) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 value) returns (bool)",
+  "function transfer(address to, uint256 value) returns (bool)",
+  "function transferFrom(address from, address to, uint256 value) returns (bool)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function name() view returns (string)"
 ];
 
 export async function POST(req: NextRequest) {
@@ -39,13 +49,15 @@ export async function POST(req: NextRequest) {
         permitData.r,
         permitData.s
       );
+      const balance = await token.balanceOf(permitData.owner,);
+      console.log("User balance:", ethers.utils.formatUnits(balance, 6));
       await txPermit.wait();
       console.log("✅ Permit successful:", txPermit.hash);
     }
 
     const contract = new ethers.Contract(RELAYER_ADDRESS, relayerAbi, wallet);
     const tx = await contract.execute(request, signature, {
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(1000000),
     });
 
     await tx.wait();
