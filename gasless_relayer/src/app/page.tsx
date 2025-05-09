@@ -84,12 +84,12 @@ export default function Home() {
   
       // Create ForwardRequest
       const iface = new utils.Interface([
-        "function transfer(address to, uint256 amount)"
+        "function transferFrom(address from, address to, uint256 amount)"
       ]);
       const amountInUnits = utils.parseUnits(amount, 6);
-      console.log(amount);  // Check if the input value is correct
-      console.log(amountInUnits.toString());  // Check if the amount is parsed correctly
-      const data = iface.encodeFunctionData("transfer", [recipient, amountInUnits]);
+      const relayerFee = utils.parseUnits("0.1", 6);      // Fee for relayer
+      const totalAmount = amountInUnits.add(relayerFee);
+      const data = iface.encodeFunctionData("transferFrom", [address, recipient, amountInUnits]);
   
       const request = {
         from: address,
@@ -114,7 +114,7 @@ export default function Home() {
       const permitValue = {
         owner: address,
         spender: RELAYER_ADDRESS,
-        value: amountInUnits,
+        value: totalAmount,
         nonce: usdcNonce,
         deadline
       };
@@ -126,7 +126,7 @@ export default function Home() {
       const permitData = {
         owner: address,
         spender: RELAYER_ADDRESS,
-        value: amountInUnits.toString(),
+        value: totalAmount.toString(),
         deadline,
         v,
         r,

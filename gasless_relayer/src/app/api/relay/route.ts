@@ -37,9 +37,24 @@ export async function POST(req: NextRequest) {
     const provider = new ethers.providers.WebSocketProvider(RPC_URL);
     const wallet = new ethers.Wallet(RELAYER_PRIVATE_KEY, provider);
 
+    const iface = new ethers.utils.Interface([
+      "function transferFrom(address from, address to, uint256 amount)"
+    ]);
+    const decoded = iface.decodeFunctionData("transferFrom", request.data);
+    const [from, to, amount] = decoded;
+
+    console.log("Decoded transferFrom details:");
+    console.log(`- From: ${from}`);
+    console.log(`- To: ${to}`);
+    console.log(`- Amount: ${ethers.utils.formatUnits(amount, 6)}`);
+
     // Optional: If permitData is provided, send permit tx
     if (permitData && tokenAddress) {
+      
       const token = new ethers.Contract(tokenAddress, permitAbi, wallet);
+      const allowanceBefore = await token.allowance(permitData.owner, permitData.spender);
+      console.log("Allowance before permit:", ethers.utils.formatUnits(allowanceBefore, 6));
+
       const txPermit = await token.permit(
         permitData.owner,
         permitData.spender,
@@ -53,12 +68,18 @@ export async function POST(req: NextRequest) {
       console.log("User balance:", ethers.utils.formatUnits(balance, 6));
       await txPermit.wait();
       console.log("✅ Permit successful:", txPermit.hash);
+
+      // Check allowance before sending permit transaction
+      const updatedAllowance = await token.allowance(permitData.owner, permitData.spender);
+      const updatedFormattedAllowance = ethers.utils.formatUnits(updatedAllowance, 6); // Assuming 6 decimals
+      console.log("Updated Allowance after permit:", updatedFormattedAllowance);
+
     }
 
     const contract = new ethers.Contract(RELAYER_ADDRESS, relayerAbi, wallet);
     const tx = await contract.execute(request, signature, {
       gasLimit: ethers.utils.hexlify(1000000),
-    });
+    })
 
     await tx.wait();
 

@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
+
 contract GaslessRelayer is EIP712, Ownable {
     using ECDSA for bytes32;
 
@@ -30,6 +32,13 @@ contract GaslessRelayer is EIP712, Ownable {
     event TransactionRelayed(address indexed from, address indexed to, bool success, bytes returnData);
     event FeeUpdated(uint256 newFee);
     event FeeTokenUpdated(address newToken);
+    event DebugInfo(
+        address from,
+        address relayer,
+        uint256 fee,
+        uint256 balance,
+        uint256 allowance
+    );
 
     constructor(address _feeToken, uint256 _initialFee) EIP712("GaslessRelayer", "1") Ownable() {
         feeToken = IERC20(_feeToken);
@@ -61,25 +70,22 @@ contract GaslessRelayer is EIP712, Ownable {
         bytes calldata signature
     ) external returns (bool success, bytes memory ret) {
         require(verify(req, signature), "Invalid signature");
+
+        uint256 balance = feeToken.balanceOf(req.from);
+        uint256 allowance = feeToken.allowance(req.from, address(this));
+
+        emit DebugInfo(req.from, msg.sender, relayerFee, balance, allowance);
+
         require(feeToken.transferFrom(req.from, msg.sender, relayerFee), "Fee transfer failed");
 
         nonces[req.from]++;
-
-        // Execute the transaction
         (success, ret) = req.to.call{gas: req.gas, value: req.value}(req.data);
-        emit TransactionRelayed(req.from, req.to, success, ret);
 
-        // Refund excess gas if any
-        if (success && tx.gasprice > 0) {
-            uint256 refundAmount = (req.gas - gasleft()) * tx.gasprice;
-            if (refundAmount > 0) {
-                (bool refundSuccess, ) = payable(msg.sender).call{value: refundAmount}("");
-                require(refundSuccess, "Refund failed");
-            }
-        }
+        emit TransactionRelayed(req.from, req.to, success, ret);
 
         return (success, ret);
     }
+
 
     function setFee(uint256 _newFee) external onlyOwner {
         relayerFee = _newFee;
