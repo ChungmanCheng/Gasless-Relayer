@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "FixedPoint96",
+  "sourceName": "contracts/gaslessRelayer.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212208854e84c43a2b885813cebeaa7dd3efe4c3f8664eac67f19cae19bde2177a4f564736f6c63430008140033",
+  "deployedBytecode": "0x600080fdfea26469706673582212208854e84c43a2b885813cebeaa7dd3efe4c3f8664eac67f19cae19bde2177a4f564736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

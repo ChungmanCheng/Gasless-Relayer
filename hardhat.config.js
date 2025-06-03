@@ -53,6 +53,16 @@ module.exports = {
         compilers: [
             {
                 version: "0.8.20", // Compatible with Uniswap V3
+                settings: {
+                    viaIR: true,
+                    optimizer: {
+                      enabled: true,
+                      runs: 200,
+                    },
+                },
+            },
+            {
+                version: "0.7.6", // for Uniswap V3 core
             },
         ],
     },
