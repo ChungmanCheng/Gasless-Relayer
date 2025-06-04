@@ -14,3 +14,24 @@ A simple gasless transaction framework using Solidity and ECDSA signatures. This
 
 - **Network**: Sepolia Testnet  
 - **GaslessRelayer Contract Address**: [`0x10C0BD984379351cE9196E3a55f68E6297be1d9e`](https://sepolia.etherscan.io/address/0x10C0BD984379351cE9196E3a55f68E6297be1d9e)
+
+## 🚀 Getting Started
+
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/ChungmanCheng/Gasless-Relayer.git
+cd gasless_relayer
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the Frontend
+
+```bash
+npm run dev
+```
