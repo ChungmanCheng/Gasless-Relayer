@@ -64,7 +64,9 @@ export default function Home() {
       // Prepare relayer and USDC contracts
       const relayer = new ethers.Contract(
         RELAYER_ADDRESS,
-        ["function getNonce(address) view returns (uint256)"],
+        ["function getNonce(address) view returns (uint256)",
+          "function estimateFeeInUSDC(uint256) view returns (uint256)"
+        ],
         provider
       );
   
@@ -77,9 +79,11 @@ export default function Home() {
         provider
       );
   
-      const [nonce, usdcName] = await Promise.all([
+      const gasEstimate = 2000000; // For USDC transfer
+      const [nonce, usdcName, feeInUSDC] = await Promise.all([
         relayer.getNonce(address),
-        usdc.name()
+        usdc.name(),
+        relayer.estimateFeeInUSDC(gasEstimate)
       ]);
   
       // Create ForwardRequest
@@ -87,8 +91,7 @@ export default function Home() {
         "function transferFrom(address from, address to, uint256 amount)"
       ]);
       const amountInUnits = utils.parseUnits(amount, 6);
-      const relayerFee = utils.parseUnits("0.1", 6);      // Fee for relayer
-      const totalAmount = amountInUnits.add(relayerFee);
+      const totalAmount = amountInUnits.add(feeInUSDC);
       const data = iface.encodeFunctionData("transferFrom", [address, recipient, amountInUnits]);
   
       const request = {
