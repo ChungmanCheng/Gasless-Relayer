@@ -166,19 +166,11 @@ contract GaslessRelayer is EIP712, Ownable {
         uint256 decimals;
         if (isToken0USDC) {
             // USDC is token0 (ETH/USDC pool), priceX96 is in ETH/USDC
-            if (t1Decimals > t0Decimals) {
-                decimals = t1Decimals - t0Decimals; // 18 - 6 = 12
-            } else {
-                decimals = 0;
-            }
+            decimals = t1Decimals - t0Decimals; // 18 - 6 = 12
             return FullMath.mulDiv(priceX96, 10 ** decimals, 2 ** 96); // Returns USDC (6 decimals)
         } else {
             // ETH is token0 (USDC/ETH pool), priceX96 is in USDC/ETH
-            if (t0Decimals > t1Decimals) {
-                decimals = t0Decimals - t1Decimals; // 18 - 6 = 12
-            } else {
-                decimals = 0;
-            }
+            decimals = t0Decimals - t1Decimals;
             // Invert price to get ETH/USDC
             return FullMath.mulDiv(2 ** 96, 10 ** decimals, priceX96); // Returns USDC (6 decimals)
         }
