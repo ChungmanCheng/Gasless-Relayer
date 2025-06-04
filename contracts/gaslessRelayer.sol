@@ -97,7 +97,14 @@ contract GaslessRelayer is EIP712, Ownable {
 
         return (success, ret);
     }
-
+    
+    function estimateFeeInUSDC(uint256 gasEstimate) public view returns (uint256) {
+        uint256 totalGas = gasEstimate + gasOverhead;
+        uint256 gasPrice = block.basefee + 1e9; // Approximate gas price (base fee + tip)
+        uint256 ethCost = totalGas * gasPrice;
+        uint256 ethPriceInUSDC = getEthPriceInUSDC();
+        return (ethCost * ethPriceInUSDC) / 1e18;
+    }
 
     function setFee(uint256 _newGas) external onlyOwner {
         gasOverhead = _newGas;
